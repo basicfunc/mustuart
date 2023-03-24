@@ -8,8 +8,9 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, Conv1D,\
     MaxPooling1D, BatchNormalization, Activation, Flatten
 
-
 # Step 2: Load and preprocess the GTZAN dataset
+
+
 def load_gtzan_data(gtzan_dir, num_segments=5, n_mfcc=13,
                     n_fft=2048, hop_length=512):
     genres = os.listdir(gtzan_dir)
@@ -50,6 +51,8 @@ print(X_train)
 print(X_test)
 
 # Step 3: Define a neural network model
+
+
 def create_model(input_shape):
     model = Sequential()
 

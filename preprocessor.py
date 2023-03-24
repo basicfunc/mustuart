@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 import pickle
 import os
 import numpy as np
@@ -40,7 +39,7 @@ def read_data(directory):
                         eraseLastLine()
 
                     print(
-                        f'[{idx+1}/{total_files}] Processing: {directory}{file}')
+                        f'\033[1;37m[{idx+1}/{total_files}]\033[0m Processing: {directory}{file}')
                     y, sr = librosa.load(directory + '/' + dir + '/' + file)
                     mfcc = librosa.feature.mfcc(y=y, sr=sr)
                     S = librosa.feature.melspectrogram(
@@ -157,7 +156,7 @@ def split_data(dataset, labels, num_classes=10, test_images_for_class=10):
 
 
 if __name__ == '__main__':
-    all_data, all_labels = read_data("genres_original/")
+    all_data, all_labels = read_data("dataset/genres/")
     print(f"Shape of data: {all_data.shape}")
     print(f"Shape of labels: {all_labels.shape}")
     print("Shuffling data...")
@@ -188,14 +187,14 @@ if __name__ == '__main__':
     print("Shape of test labels:")
     print(test_labels_std.shape)
 
-    pickle_file = 'preprocessed_data.pickle'
+    pickle_file = 'dataset/preprocessed_data.pickle'
 
     # save data to a pickle file to load when training
     print(f"Saving data into pickle file: {pickle_file}")
 
     try:
         if os.path.exists(pickle_file):
-            raise FileExistsError
+            raise FileExistsError("Error: File already exists.")
 
         f = open(pickle_file, 'wb')
         save = {
@@ -208,8 +207,5 @@ if __name__ == '__main__':
         f.close()
         print("Done")
     except Exception as e:
-        if e is FileExistsError:
-            error("Error: File already exists.")
-        else:
-            error(f'Unable to save data to {pickle_file}: {e}')
+        error(f'Unable to save data to {pickle_file}: {e}')
         raise
