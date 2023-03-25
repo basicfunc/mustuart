@@ -2,8 +2,6 @@ import pickle
 import os
 import numpy as np
 import librosa
-import librosa.display
-
 
 def eraseLastLine():
     CURSOR_UP_ONE = '\x1b[1A'
