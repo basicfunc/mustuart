@@ -1,106 +1,90 @@
-# Step 1: Import required libraries
+
 import os
-import librosa
 import numpy as np
-import tensorflow as tf
+from scipy.io import wavfile
+from python_speech_features import mfcc
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM, Conv1D,\
-    MaxPooling1D, BatchNormalization, Activation, Flatten
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+import pickle
 
-# Step 2: Load and preprocess the GTZAN dataset
+if os.path.exists('models/svm_model.pkl'):
+    with open('models/svm_model.pkl', 'rb') as f:
+        clf = pickle.load(f)
+
+    # Load a song to predict its genre
+    filename = 'Counting-Stars.wav'
+    rate, signal = wavfile.read(filename)
+    mfcc_features = mfcc(signal, rate, numcep=20)
+    mfcc_features = mfcc_features.mean(axis=0)
+    scaler = StandardScaler()
+    mfcc_features = scaler.fit_transform(mfcc_features.reshape(1, -1))
+
+    # Predict the genre of the song
+    genre = clf.predict(mfcc_features)
+    print("The genre of the song is", genre[0])
 
 
-def load_gtzan_data(gtzan_dir, num_segments=5, n_mfcc=13,
-                    n_fft=2048, hop_length=512):
-    genres = os.listdir(gtzan_dir)
+else:
+    # Set the path to the directory containing the audio files
+    audio_dir = 'dataset/genres'
+
+    # Define the list of genres
+    genres = ['blues', 'classical', 'country', 'disco',
+              'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
+
+    # Load the audio data and extract MFCC features for each file
     data = []
     labels = []
-
-    for i, genre in enumerate(genres):
-        genre_dir = os.path.join(gtzan_dir, genre)
+    for genre in genres:
+        genre_dir = os.path.join(audio_dir, genre)
         for filename in os.listdir(genre_dir):
-            song_path = os.path.join(genre_dir, filename)
-            samples, sample_rate = librosa.load(song_path, sr=None)
-            duration = samples.shape[0] // sample_rate
+            filepath = os.path.join(genre_dir, filename)
+            rate, signal = wavfile.read(filepath)
+            mfcc_features = mfcc(signal, rate, numcep=20)
+            mfcc_features = mfcc_features.mean(axis=0)
+            data.append(mfcc_features)
+            labels.append(genre)
 
-            for j in range(num_segments):
-                start = j * duration // num_segments * sample_rate
-                end = (j + 1) * duration // num_segments * sample_rate
-                mfcc = librosa.feature.mfcc(
-                    y=samples[start:end], sr=sample_rate, n_mfcc=n_mfcc,
-                    n_fft=n_fft, hop_length=hop_length)
-                mfcc = mfcc.T
-                if mfcc.shape[0] < n_mfcc:
-                    # Pad with zeros
-                    mfcc = np.pad(mfcc, ((0, n_mfcc - mfcc.shape[0]), (0, 0)))
-                data.append(mfcc)
-                labels.append(i)
+    # Convert the data and labels to NumPy arrays
+    data = np.array(data)
+    labels = np.array(labels)
 
-    return np.array(data), np.array(labels), genres
+    # Split the dataset into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(
+        data, labels, test_size=0.2, random_state=42)
 
+    # Standardize the data
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
 
-# Set the path to the GTZAN dataset
-gtzan_dir = "genres_original/"
+    # Create the SVM classifier
+    clf = svm.SVC(kernel='linear')
 
-data, labels, genres = load_gtzan_data(gtzan_dir)
-X_train, X_test, y_train, y_test = train_test_split(
-    data, labels, test_size=0.2, stratify=labels, random_state=42)
+    # Train the classifier on the training set
+    clf.fit(X_train, y_train)
 
-print(X_train)
-print(X_test)
+    with open('models/svm_model.pkl', 'wb') as f:
+        pickle.dump(clf, f)
 
-# Step 3: Define a neural network model
+    # Predict the genres of the test set
+    y_pred = clf.predict(X_test)
 
+    # Calculate the accuracy of the classifier
+    accuracy = accuracy_score(y_test, y_pred)
 
-def create_model(input_shape):
-    model = Sequential()
+    print("Accuracy:", accuracy)
 
-    model.add(Conv1D(64, kernel_size=3, input_shape=input_shape))
-    model.add(Activation("relu"))
-    model.add(BatchNormalization())
-    model.add(MaxPooling1D(pool_size=3))
+    # Load a song to predict its genre
+    filename = 'Counting-Stars.wav'
+    rate, signal = wavfile.read(filename)
+    mfcc_features = mfcc(signal, rate, numcep=20)
+    mfcc_features = mfcc_features.mean(axis=0)
+    mfcc_features = mfcc_features.reshape(1, -1)
+    mfcc_features = scaler.transform(mfcc_features)
 
-    model.add(Conv1D(128, kernel_size=3))
-    model.add(Activation("relu"))
-    model.add(BatchNormalization())
-    model.add(MaxPooling1D(pool_size=3))
-
-    model.add(LSTM(64))
-    model.add(Dropout(0.3))
-
-    model.add(Dense(64, activation="relu"))
-    model.add(Dropout(0.3))
-
-    model.add(Dense(10, activation="softmax"))
-
-    model.compile(optimizer="adam",
-                  loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-
-    return model
-
-
-input_shape = (X_train.shape[1], X_train.shape[2], 1)
-model = create_model(input_shape)
-
-# Step 4: Train the model
-history = model.fit(X_train, y_train, validation_data=(
-    X_test, y_test), batch_size=32, epochs=50)
-
-
-# Step 5: Create a function to load and preprocess a new song
-def preprocess_song(song_path, n_mfcc=13, n_fft=2048, hop_length=512):
-    samples, sample_rate = librosa.load(song_path, sr=None)
-    mfcc = librosa.feature.mfcc(
-        samples, sr=sample_rate, n_mfcc=n_mfcc, n_fft=n_fft,
-        hop_length=hop_length)
-    mfcc = mfcc.T
-    return np.array([mfcc])
-
-
-# Step 6: Get user input and predict genre
-song_path = input("Enter the path to the song: ")
-song_data = preprocess_song(song_path)
-prediction = model.predict(song_data)
-predicted_genre = genres[np.argmax(prediction)]
-print(f"The predicted genre for the song is: {predicted_genre}")
+    # Predict the genre of the song
+    genre = clf.predict(mfcc_features)
+    print("The genre of the song is", genre[0])
