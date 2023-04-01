@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Compute MFCC of WAV file</title>
+    <script src="https://cdn.jsdelivr.net/npm/meyda@5.6.0/dist/web/meyda.min.js"></script>
+</head>
+
+<body>
+    <h1>Compute MFCC of WAV file</h1>
+    <label for="file">Select a WAV file:</label>
+    <input type="file" id="fileInput" name="file" accept=".wav" onchange="handleFileSelect(event)">
+    <script>
+        function handleFileSelect(event) {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            if (!file || file.type !== 'audio/wav') {
+                alert('Please select a valid WAV file.');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var audioData = event.target.result;
+                var features = Meyda.extract('mfcc', audioData, { bufferSize: 512 });
+                console.log('MFCC features:', features);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    </script>
+</body>
+
+</html>
