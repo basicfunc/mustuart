@@ -24,15 +24,19 @@ if len(sys.argv) != 2:
 song_path = sys.argv[1]
 song_path = song_path.strip()
 
-if os.path.exists('models/svm_model.pkl') and \
-        os.path.exists('models/data.npy') and \
-        os.path.exists('models/labels.npy'):
+if os.path.exists('saved_models/svm_model.pkl') and \
+        os.path.exists('saved_models/data.npy') and \
+        os.path.exists('saved_models/labels.npy'):
 
-    with open('models/svm_model.pkl', 'rb') as f:
+    print("Found saved model, loading..")
+
+    with open('saved_models/svm_model.pkl', 'rb') as f:
         clf = pickle.load(f)
 
-    data = np.load('models/data.npy')
-    labels = np.load('models/labels.npy')
+    data = np.load('saved_models/data.npy')
+    labels = np.load('saved_models/labels.npy')
+
+    print(labels)
 
     X_train, X_test, y_train, y_test = train_test_split(
         data, labels, test_size=0.2, random_state=42)
@@ -40,17 +44,19 @@ if os.path.exists('models/svm_model.pkl') and \
     # Standardize the data
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    # X_test = scaler.transform(X_test)
 
     # Load a song to predict its genre
-    mfcc_features = scaler.transform(load_song(song_path))
+    # mfcc_features = scaler.transform(load_song(song_path))
 
     # Predict the genre of the song
-    genre = clf.predict(mfcc_features)
-    print("The genre of the song is", *genre)
+    # genre = clf.predict(mfcc_features)
 
+    print("The genre of the song is", *
+          clf.predict(scaler.transform(load_song(song_path))))
 
 else:
+    print("Unable to found saved model, training..")
     # Set the path to the directory containing the audio files
     audio_dir = 'dataset/genres'
 
@@ -75,8 +81,8 @@ else:
     data = np.array(data)
     labels = np.array(labels)
 
-    np.save('models/data.npy', data)
-    np.save('models/labels.npy', labels)
+    np.save('saved_models/data.npy', data)
+    np.save('saved_models/labels.npy', labels)
 
     # Split the dataset into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(
@@ -93,7 +99,7 @@ else:
     # Train the classifier on the training set
     clf.fit(X_train, y_train)
 
-    with open('models/svm_model.pkl', 'wb') as f:
+    with open('saved_models/svm_model.pkl', 'wb') as f:
         pickle.dump(clf, f)
 
     # Predict the genres of the test set
