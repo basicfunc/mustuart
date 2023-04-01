@@ -3,3 +3,5 @@ saved_models
 __pycache__
 .ipynb_checkpoints
 *.wav
+node_modules
+package-lock.json
