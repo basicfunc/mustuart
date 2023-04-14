@@ -5,24 +5,40 @@ import sfeatpy as sp
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 from sklearn.preprocessing import StandardScaler
+from pyAudioAnalysis import audioBasicIO, ShortTermFeatures
 
 
-def load_song(filename):
-    with wave.open(filename, 'rb') as f:
-
-        nchannels, _, _, nframes, *_ = f.getparams()
-
-        frames = f.readframes(nframes)
-
-        signal = np.frombuffer(frames, dtype=np.int16).astype(
-            np.float32) / 32768.0
-
-        if nchannels > 1:
-            signal = signal[::nchannels]
-
-    mfcc = sp.mfcc(signal)
+def dload_song(filename):
+    fs, x = audioBasicIO.read_audio_file(filename)
+    win_size = 0.1
+    win_step = 0.05
+    features, _, _ = ShortTermFeatures.feature_extraction(
+        x, fs, win_size * fs, win_step * fs)
+    mfccs = features[8:21, :]
     mfcc_features = mfcc.mean(axis=0)
     return mfcc_features.reshape(1, -1)
+
+
+def load_song(song_path, sr=44100, win_size=0.1, win_step=0.1):
+    # Load audio file
+    [fs, x] = audioBasicIO.read_audio_file(song_path)
+
+    # Resample if necessary
+    if fs != sr:
+        x = audioBasicIO.resample_signal(x, fs, sr)
+        fs = sr
+
+    # Check the shape of the audio data
+    if x.ndim == 1:
+        x = np.expand_dims(x, axis=1)
+    elif x.ndim > 2:
+        x = np.mean(x, axis=1, keepdims=True)
+
+    # Extract short-term features
+    features, _, _ = ShortTermFeatures.feature_extraction(
+        x, sr, win_size * sr, win_step * sr)
+
+    return features
 
 
 def predict(song_path):
@@ -52,4 +68,10 @@ def predict(song_path):
 
 if __name__ == '__main__':
     import sys
-    print(predict(sys.argv[1]))
+
+    if len(sys.argv) < 2:
+        print("Bruh!!!")
+        exit()
+
+    song = sys.argv[1]
+    print(predict(song))

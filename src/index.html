@@ -8,13 +8,25 @@
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 
-    <py-config>
-        packages = [ "numpy", "scikit-learn", "scipy", "sfeatpy"]
-    </py-config>
 </head>
 
 <body>
+    <py-config>
+        packages = [ "numpy", "scikit-learn", "scipy"]
+    </py-config>
 
+    <py-script>
+        import micropip
+        import asyncio
+
+        async def install_speech():
+            await micropip.install("emfs://assets/python_speech_features-0.6.1-py3-none-any.whl")
+
+        asyncio.ensure_future(install_speech())
+
+        import python_speech_features as ps
+        print(ps)
+    </py-script>
 </body>
 
 </html>
