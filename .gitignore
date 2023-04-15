@@ -5,3 +5,5 @@ __pycache__
 *.wav
 node_modules
 package-lock.json
+.parcel-cache
+dist

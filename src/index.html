@@ -7,26 +7,21 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-
+    <script type="module" src="./script.js"></script>
 </head>
 
 <body>
     <py-config>
-        packages = [ "numpy", "scikit-learn", "scipy"]
+        terminal = false
+        packages = [ "numpy", "scikit-learn", "scipy", "./static/wheel/python_speech_features-0.6.1-py3-none-any.whl"]
+    
+        [splashscreen]
+        autoclose = true
     </py-config>
 
-    <py-script>
-        import micropip
-        import asyncio
-
-        async def install_speech():
-            await micropip.install("emfs://assets/python_speech_features-0.6.1-py3-none-any.whl")
-
-        asyncio.ensure_future(install_speech())
-
-        import python_speech_features as ps
-        print(ps)
-    </py-script>
+    <!-- <py-script> -->
+        <!-- import python_speech_features -->
+    <!-- </py-script> -->
 </body>
 
 </html>
