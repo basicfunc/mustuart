@@ -36,8 +36,6 @@ if os.path.exists('saved_models/svm_model.pkl') and \
     data = np.load('saved_models/data.npy')
     labels = np.load('saved_models/labels.npy')
 
-    print(labels)
-
     X_train, X_test, y_train, y_test = train_test_split(
         data, labels, test_size=0.2, random_state=42)
 

@@ -1,0 +1,9 @@
+terminal = false
+packages = [ "numpy", "scikit-learn", "scipy", "http://rahuul.me/mustuart/static/python_speech_features-0.6.1-py3-none-any.whl"]
+    
+[splashscreen]
+enabled = false
+autoclose = true
+
+[[fetch]]
+files = ["app.py"]
