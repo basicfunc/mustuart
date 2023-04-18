@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beat Bot</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="../static/musical-note.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Quicksand:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="./assets/musical-note.png" type="image/png">
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="spinner">
+        <div class="r1"></div>
+        <div class="r2"></div>
+        <div class="r3"></div>
+        <div class="r4"></div>
+        <div class="r5"></div>
+      </div>
+    </div>
+    <div class="column">
+      <p class="section title has-text-centered glow">Beat Bot</p>
+      <form
+        id="audio-form"
+        action="/submit"
+        enctype="multipart/form-data"
+        method="post"
+      >
+        <input
+          type="file"
+          accept="audio/*, video/*"
+          id="myfile"
+          name="myfile"
+          onchange="handleFileUpload()"
+        />
+        <label for="myfile" id="mylabel">Choose an audio file</label>
+        <button type="submit">Predict</button>
+      </form>
+      <section class="column title has-text-centered mt-5 ">
+        <ul>
+            <li class="song">first song</li>
+            <li class="song">second song</li>
+            <li class="song">third song</li>
+            <li class="song">fourth song</li>
+            <li class="song">fifth song</li>
+        </ul>
+      </section>
+    </div>
+    <script src="index.js"></script>
+  </body>
+</html>
