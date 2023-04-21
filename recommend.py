@@ -4,7 +4,7 @@ def identify(song):
 
     # Set the API endpoint and your API key
     endpoint = "https://api.audd.io/"
-    api_key = "23078212abd500d3c1ed64966e59be9b"
+    api_key = "API_HERE"
 
     # Send an HTTP POST request to the API endpoint with the audio file and your API key
     response = requests.post(endpoint + "?method=recognize&api_token=" + api_key,
