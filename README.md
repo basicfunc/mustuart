@@ -4,6 +4,7 @@ This project aims to build a music genre classification engine using machine lea
 # Dataset
 The GTZAN dataset contains 1000 30-second audio clips evenly split between 10 genres (blues, classical, country, disco, hiphop, jazz, metal, pop, reggae, rock). The clips are all 22050 Hz Mono 16-bit audio files in .wav format.
 The GTZAN dataset is limited to only English songs, which may not represent the diversity of music across different cultures and languages. Additionally, the dataset is small, and some of the songs are not of high quality, which may affect the performance of the models trained on the dataset.
+
 Datset can be found here - https://www.kaggle.com/andradaolteanu/gtzan-dataset-music-genre-classification/download
 
 # Features
